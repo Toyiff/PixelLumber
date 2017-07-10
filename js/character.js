@@ -44,6 +44,7 @@
 		this.pos.y = 0;
 		this.sprite = {};
 		this.sprite.url = url;
+		this.sprite.dir = 0;
 		this.animation = {};
 		this.animation.frames = frames;
 		this.animation.fps = fps;
@@ -56,15 +57,21 @@
 
 		if (dir.x != 0 || dir.y != 0) {
 			this.animation._frameIndex += dt;
+			this.pos.x += dir.x * this.speed * dt / 1000;
+			this.pos.y += dir.y * this.speed * dt / 1000;
+			if (dir.x == 1) {
+				this.sprite.dir = 0;
+			}
+			else {
+				this.sprite.dir = 1;
+
+			}
 		} 
 		else {
 			this.animation._frameIndex = 0;
 		}
 		
 		// console.log(this.animation._frameIndex);
-
-		this.pos.x += dir.x * this.speed * dt / 1000;
-		this.pos.y += dir.y * this.speed * dt / 1000;
 	}
 
 	Character.prototype.render = function(ctx, interp) {
@@ -75,9 +82,10 @@
 
 		if (this.animation.frames > 1) {
 			if (dir.x != 0 || dir.y != 0) {
-				var flatIndex = Math.floor(this.animation._frameIndex / (1000 / this.animation.fps));
-				console.log(flatIndex);
-				currentFrame = (flatIndex % this.animation.frames);
+				var flatIndex = this.animation._frameIndex / (1000 / this.animation.fps);
+				// console.log("Flat Index: " + flatIndex);
+				currentFrame = Math.floor(flatIndex % this.animation.frames);
+				console.log("Current Frame: " + currentFrame);
 			}
 			else {
 				currentFrame = 0;
@@ -86,16 +94,33 @@
 			// console.log(currentFrame);
 		}
 
-		var x = 0;
+		var x = -1;
 		var y = 0;
 		x += currentFrame * this.size[0];
 
 		// ctx.fillRect(this.pos.x, this.pos.y, this.width, this.height);
-		ctx.drawImage(resources.get(this.sprite.url),
-		              x, y,
-		              this.size[0], this.size[1],
-		              this.pos.x, this.pos.y,
-		              this.size[0], this.size[1]);
+		if (this.sprite.dir == 0) {
+			ctx.drawImage(resources.get(this.sprite.url),
+			              x, y,
+			              this.size[0], this.size[1],
+			              this.pos.x, this.pos.y,
+			              this.size[0], this.size[1]);
+		}else {
+			ctx.save();
+
+			ctx.translate(this.pos.x + this.size[0] / 2, this.pos.y + this.size[1] / 2);
+			ctx.scale(-1, 1);
+			
+			ctx.drawImage(resources.get(this.sprite.url),
+			              x, y,
+			              this.size[0], this.size[1],
+			              -this.size[0]/2, -this.size[1]/2,
+			              this.size[0], this.size[1]);
+			
+			
+			ctx.restore();
+		}
+		
 	}
 
 	function _moveMentCheck() {

@@ -30,7 +30,7 @@ var _Debugging = true;
 
 // Game Loop Timing and FPS controls
 var lastTick = 0;
-var maxFPS = 7;
+var maxFPS = 60;
 var timestep = 1000 / 60; //This basically means updates 60 times per second.
 var delta = 0;
 
@@ -40,7 +40,7 @@ var fps = 0,
 
 // Game Variables
 var girl,
-	girl_speed = 100;
+	girl_speed = 200;
 
 
 
@@ -80,7 +80,7 @@ function menuStart() {
 function gameInit() {
 	gameState = "GAME_RUN";
 
-	girl = new Character('img/soilder_walk.png', 120, 120, girl_speed, 6, 6);
+	girl = new Character('img/soilder_walk.png', 120, 120, 200, 6, 12);
 
 	window.requestAnimationFrame(gameRun);
 	lastTick = window.performance.now();
