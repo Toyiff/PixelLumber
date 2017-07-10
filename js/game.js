@@ -23,25 +23,26 @@ canvas.addEventListener("mousedown", mouseDown, false);
 canvas.addEventListener('mouseup',   mouseUp, false); 
 document.addEventListener('keypress',  keyPress, false); 
 
-//Game State Controls
+// Game State Controls
 var gameState;
 
 var _Debugging = true;
 
+// Game Loop Timing and FPS controls
 var lastTick = 0;
 var maxFPS = 60;
-var timestep = 1000 / 60;
+var timestep = 1000 / 60; //This basically means updates 60 times per second.
 var delta = 0;
 
-//Game States:
-/*
-Loading screen: 0
-
-*/
+var fps = 0,
+    framesThisSecond = 0,
+    lastFpsUpdate = 0;
 
 // Game Variables
+var girl,
+	girl_speed = 100;
 
-	var boxPos = 10, boxVelocity = 0.2, limit = 300;
+
 
 init();
 
@@ -57,7 +58,8 @@ function init() {
 
 resources.load([
     'img/idle.png', 
-    'img/moving.png'
+    'img/moving.png',
+    'img/eoe.gif'
 ]);
 resources.onReady(menuStart);
 
@@ -76,8 +78,13 @@ function menuStart() {
 
 function gameInit() {
 	gameState = "GAME_RUN";
+
+	girl = new Character(100, 100, girl_speed);
+
 	window.requestAnimationFrame(gameRun);
 	lastTick = window.performance.now();
+
+
 }
 
 function gameRun(tick) {
@@ -87,11 +94,20 @@ function gameRun(tick) {
 			gameStop();
 		}
 
+		if (tick > lastFpsUpdate + 1000) { // update every second
+	        fps = 0.75 * framesThisSecond + (1 - 0.75) * fps; // compute the new FPS
+	 
+	        lastFpsUpdate = tick;
+	        framesThisSecond = 0;
+	        // if (_Debugging) console.log("FPS: " + fps);
+	    }
+	    
 		if (tick < lastTick + (1000 / maxFPS)) {
-			
 	        window.requestAnimationFrame(gameRun);
 	        return;
 	    }
+
+	    framesThisSecond++;
 
 	    // Track the accumulated time that hasn't been simulated yet
         delta += tick - lastTick; // note += here
@@ -103,22 +119,22 @@ function gameRun(tick) {
             delta -= timestep;
         }
 	    render();
-	    lastTick = tick;
 
 	    window.requestAnimationFrame(gameRun);
 	}
 }
 
 function update(dt) {
-	boxPos += boxVelocity * dt;
-	// Switch directions if we go too far
-	if (boxPos >= limit || boxPos <= 0) boxVelocity = -boxVelocity;
+	// boxPos += boxVelocity * dt;
+	// if (boxPos >= limit || boxPos <= 0) boxVelocity = -boxVelocity;
+	girl.update(dt);
+
 }
 
 function render() {
+
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	ctx.fillStyle = "#000000";
-	ctx.fillRect(boxPos, 10, 100, 100);
+	girl.render();
 
 }
 
@@ -133,22 +149,24 @@ function mouseMove(event) {
 function mouseDown(event) {
 
 	if (_Debugging) {
-		console.log("mouseDown");
+		console.log("INPUT: MOUSE Down");
 	}
 } 
 
 function mouseUp(event) {
 
 	if (_Debugging) {
-		console.log("mouseUp");
+		console.log("INPUT: MOUSE Up");
 	}
 
 }
 
+// var _previous_time, _pp;
+
 function keyPress(event) {
 
 	if (_Debugging) {
-		console.log("keyPressed, keyCode: " + event.keyCode);
+		// console.log("INPUT: KEY Code: " + event.keyCode);
 	}
 
 	switch(event.keyCode) {
@@ -156,6 +174,15 @@ function keyPress(event) {
 			if (gameState == "MENU_START") {
 				gameInit();
 				// console.log("game Started");
+			}
+			else if (gameState == "GAME_RUN") {
+
+				// These are for the testing of the speed of the object, the result is 1000 pxiel per second.
+				// var now = window.performance.now();
+				// var np = girl.pos.x;
+				// console.log("Girl Speed: " + (np - _pp) / (now - _previous_time) * 1000);
+				// _previous_time = now;
+				// _pp = np;
 			}
 			break;
 		default:
