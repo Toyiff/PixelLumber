@@ -39,8 +39,8 @@ var fps = 0,
     lastFpsUpdate = 0;
 
 // Game Variables
-var girl,
-	girl_speed = 200;
+var soldier,
+	soldier_speed = 200;
 
 
 
@@ -60,7 +60,7 @@ resources.load([
     'img/idle.png', 
     'img/moving.png',
     'img/eoe.gif',
-    'img/soilder_walk.png'
+    'img/soldier_walk.png'
 ]);
 resources.onReady(menuStart);
 
@@ -80,7 +80,7 @@ function menuStart() {
 function gameInit() {
 	gameState = "GAME_RUN";
 
-	girl = new Character('img/soilder_walk.png', 120, 120, 200, 6, 12);
+	soldier = new Character('img/soldier_walk.png', 120, 120, 200, 6, 12);
 
 	window.requestAnimationFrame(gameRun);
 	lastTick = window.performance.now();
@@ -128,14 +128,14 @@ function gameRun(tick) {
 function update(dt) {
 	// boxPos += boxVelocity * dt;
 	// if (boxPos >= limit || boxPos <= 0) boxVelocity = -boxVelocity;
-	girl.update(dt);
+	soldier.update(dt);
 
 }
 
 function render(interp) {
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	girl.render(ctx, interp);
+	soldier.render(ctx, interp);
 
 }
 
@@ -180,8 +180,8 @@ function keyPress(event) {
 
 				// These are for the testing of the speed of the object, the result is 1000 pxiel per second.
 				// var now = window.performance.now();
-				// var np = girl.pos.x;
-				// console.log("Girl Speed: " + (np - _pp) / (now - _previous_time) * 1000);
+				// var np = soldier.pos.x;
+				// console.log("soldier Speed: " + (np - _pp) / (now - _previous_time) * 1000);
 				// _previous_time = now;
 				// _pp = np;
 			}
