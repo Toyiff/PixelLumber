@@ -34,25 +34,68 @@
 	}
 	*/
 
-	function Character(width, height, speed) {
-		this.width = width;
-		this.height = height;
+	function Character(url, width, height, speed, frames, fps) {
+		this.size = [];
+		this.size.push(width);
+		this.size.push(height);
 		this.speed = speed;
 		this.pos = {};
 		this.pos.x = 0;
 		this.pos.y = 0;
+		this.sprite = {};
+		this.sprite.url = url;
+		this.animation = {};
+		this.animation.frames = frames;
+		this.animation.fps = fps;
+		this.animation._frameIndex = 0;
 	}
 
 	Character.prototype.update = function(dt) {
 
-		dir = _moveMentCheck();
+		var dir = _moveMentCheck();
+
+		if (dir.x != 0 || dir.y != 0) {
+			this.animation._frameIndex += dt;
+		} 
+		else {
+			this.animation._frameIndex = 0;
+		}
+		
+		// console.log(this.animation._frameIndex);
 
 		this.pos.x += dir.x * this.speed * dt / 1000;
 		this.pos.y += dir.y * this.speed * dt / 1000;
 	}
 
-	Character.prototype.render = function() {
-		ctx.fillRect(this.pos.x, this.pos.y, this.width, this.height);
+	Character.prototype.render = function(ctx, interp) {
+		// console.log(interp);
+
+		var currentFrame;
+		var dir = _moveMentCheck();
+
+		if (this.animation.frames > 1) {
+			if (dir.x != 0 || dir.y != 0) {
+				var flatIndex = Math.floor(this.animation._frameIndex / (1000 / this.animation.fps));
+				console.log(flatIndex);
+				currentFrame = (flatIndex % this.animation.frames);
+			}
+			else {
+				currentFrame = 0;
+			}
+			
+			// console.log(currentFrame);
+		}
+
+		var x = 0;
+		var y = 0;
+		x += currentFrame * this.size[0];
+
+		// ctx.fillRect(this.pos.x, this.pos.y, this.width, this.height);
+		ctx.drawImage(resources.get(this.sprite.url),
+		              x, y,
+		              this.size[0], this.size[1],
+		              this.pos.x, this.pos.y,
+		              this.size[0], this.size[1]);
 	}
 
 	function _moveMentCheck() {
