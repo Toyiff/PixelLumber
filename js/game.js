@@ -59,7 +59,8 @@ function init() {
 resources.load([
     'img/idle.png', 
     'img/moving.png',
-    'img/eoe.gif'
+    'img/eoe.gif',
+    'img/soilder_walk.png'
 ]);
 resources.onReady(menuStart);
 
