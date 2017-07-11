@@ -34,7 +34,7 @@ var maxFPS = 60;
 var timestep = 1000 / 60; //This basically means updates 60 times per second.
 var delta = 0;
 
-var fps = 0,
+var fps = 60,
     framesThisSecond = 0,
     lastFpsUpdate = 0;
 
@@ -74,7 +74,7 @@ function menuStart() {
 	ctx.fillStyle="#000000";
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
-	ctx.fillText("Press Space to Start" ,canvas.width/2,canvas.height/2);	
+	ctx.fillText("Press SPACE to Start" ,canvas.width/2,canvas.height/2);	
 }
 
 function gameInit() {
@@ -82,13 +82,13 @@ function gameInit() {
 
 	soldier = new Character('img/soldier_walk.png', 120, 120, 200, 6, 12);
 
-	window.requestAnimationFrame(gameRun);
 	lastTick = window.performance.now();
-
-
+	framesThisSecond = 60;
+	window.requestAnimationFrame(gameRun);
 }
 
 function gameRun(tick) {
+
 	if (gameState == "GAME_RUN") {
 
 		if (input.isDown("ENTER")) {
@@ -97,10 +97,15 @@ function gameRun(tick) {
 
 		if (tick > lastFpsUpdate + 1000) { // update every second
 	        fps = 0.75 * framesThisSecond + (1 - 0.75) * fps; // compute the new FPS
-	 
 	        lastFpsUpdate = tick;
 	        framesThisSecond = 0;
-	        // if (_Debugging) console.log("FPS: " + fps);
+	        if (_Debugging) console.log("FPS: " + fps);
+	    }
+
+	    if (fps < 15) {
+	    	
+	    	gamePause();
+	    	return;
 	    }
 	    
 		if (tick < lastTick + (1000 / maxFPS)) {
@@ -108,24 +113,63 @@ function gameRun(tick) {
 	        return;
 	    }
 
-	    framesThisSecond++;
-
 	    // Track the accumulated time that hasn't been simulated yet
         delta += tick - lastTick; // note += here
         lastTick = tick;
-     
+     	
         // Simulate the total elapsed time in fixed-size chunks
+        var numUpdateSteps = 0;
+
         while (delta >= timestep) {
+
+        	if (delta / timestep >= 180) {
+        		framesThisSecond = 60;
+        		panic();
+        		gamePause();
+        		break;
+        	}
+
             update(timestep);
             delta -= timestep;
+
+            if (++numUpdateSteps >= 180) {
+                // panic(); // fix things
+                gamePause();
+                break; // bail out
+            }
         }
+        framesThisSecond++;
 	    render(delta / timestep);
 
 	    window.requestAnimationFrame(gameRun);
 	}
 }
 
+function panic() {
+	// This is when there are too many steps to simulate. One way is to pause the game.
+	// [TODO] Pause the game when idle for two long;
+	delta = 0;
+}
+
+function gamePause() {
+	console.log("Game Paused");
+	gameState = "GAME_PAUSE";
+	window.requestAnimationFrame(renderPaused);
+}
+
+function gameUnPause() {
+	gameState = "GAME_RUN";
+
+	console.log("GAME STARTED AGAIN");
+
+	lastTick = window.performance.now();
+	framesThisSecond = 60;
+	window.requestAnimationFrame(gameRun);
+}
+
 function update(dt) {
+
+	// console.log("Update");
 	// boxPos += boxVelocity * dt;
 	// if (boxPos >= limit || boxPos <= 0) boxVelocity = -boxVelocity;
 	soldier.update(dt);
@@ -133,10 +177,23 @@ function update(dt) {
 }
 
 function render(interp) {
-
+	// console.log("Render");
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	soldier.render(ctx, interp);
+}
 
+function renderPaused() {
+	console.log("Rendered Game Paused");
+	ctx.fillStyle = "#000000";
+	ctx.globalAlpha = 0.5;
+	ctx.fillRect(0, 0, canvas.width, canvas.height);
+	ctx.globalAlpha = 1.0;
+
+	ctx.font="80px Arial";
+	ctx.fillStyle = "#ffffff";
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'middle';
+	ctx.fillText('Press SPACE to Resume' ,canvas.width/2,canvas.height/2);
 }
 
 function gameStop() {
@@ -184,10 +241,23 @@ function keyPress(event) {
 				// console.log("soldier Speed: " + (np - _pp) / (now - _previous_time) * 1000);
 				// _previous_time = now;
 				// _pp = np;
+			} else if (gameState == "GAME_PAUSE") {
+				gameState == "GAME_RUN";
+				gameUnPause();
+			}
+			break;
+		case 113: //Lowercase q
+			if (gameState == "GAME_RUN") {
+				gamePause();
+			}
+			break;
+		case 81: //Capitalcase q
+			if (gameState == "GAME_RUN") {
+				gamePause();
 			}
 			break;
 		default:
-				// console.log("Key Pressed");
+				console.log("Key Pressed" + event.keyCode);
 			return;
 	}
 

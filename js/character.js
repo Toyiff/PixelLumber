@@ -85,7 +85,7 @@
 				var flatIndex = this.animation._frameIndex / (1000 / this.animation.fps);
 				// console.log("Flat Index: " + flatIndex);
 				currentFrame = Math.floor(flatIndex % this.animation.frames);
-				console.log("Current Frame: " + currentFrame);
+				// console.log("Current Frame: " + currentFrame);
 			}
 			else {
 				currentFrame = 0;
